@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PnpFind
 {
@@ -71,9 +72,7 @@ namespace PnpFind
                 var infFile = string.Empty;
                 foreach (var infEntity in infEntities)
                 {
-                    var valueDisplayText = string.Empty;
-                    foreach (var infValue in infEntity.Value)
-                        valueDisplayText += infValue + ", ";
+                    var valueDisplayText = infEntity.Value.Aggregate(string.Empty, (Current, InfValue) => Current + (InfValue + ", "));
 
                     if (valueDisplayText.Length >= 2)
                         valueDisplayText = valueDisplayText.Substring(0, valueDisplayText.Length - 2);

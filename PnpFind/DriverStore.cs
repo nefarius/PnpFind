@@ -39,7 +39,7 @@ namespace PnpFind
         [DllImport("setupapi.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern void SetupCloseInfFile(IntPtr InfHandle);
 
-        public static int RemoveOemInf(string oemInfFileName)
+        public static int RemoveOemInf(string OemInfFileName)
         {
             var processPnpUtil = new Process
             {
@@ -47,7 +47,7 @@ namespace PnpFind
                 {
                     UseShellExecute = false,
                     FileName = "pnputil.exe",
-                    Arguments = "-f -d " + oemInfFileName,
+                    Arguments = "-f -d " + OemInfFileName,
                     CreateNoWindow = true
                 }
             };
@@ -73,12 +73,12 @@ namespace PnpFind
             return new DirectoryInfo(Path.Combine(GetWindowsDirectory().FullName, "inf"));
         }
 
-        public static FileInfo GetOemInfFullPath(string name)
+        public static FileInfo GetOemInfFullPath(string Name)
         {
-            if (!name.ToLower().EndsWith(".inf"))
-                name += ".inf";
+            if (!Name.ToLower().EndsWith(".inf"))
+                Name += ".inf";
 
-            return new FileInfo(Path.Combine(GetWindowsDirectory().FullName, name));
+            return new FileInfo(Path.Combine(GetWindowsDirectory().FullName, Name));
         }
 
         public static List<FileInfo> GetOemInfFileList()
@@ -86,26 +86,24 @@ namespace PnpFind
             return new List<FileInfo>(GetWindowsInfDirectory().GetFiles("oem*.inf"));
         }
 
-        public static bool GetInfSection(string infFile, string section,
+        public static bool GetInfSection(string InfFile, string Section,
             out Dictionary<string, List<string>> OemInfEntities)
         {
-            uint ErrorLine = 0;
             OemInfEntities = new Dictionary<string, List<string>>();
-            var infHandle = SetupOpenInfFile(infFile, null, INF_STYLE_OLDNT | INF_STYLE_WIN4, out ErrorLine);
+            var infHandle = SetupOpenInfFile(InfFile, null, INF_STYLE_OLDNT | INF_STYLE_WIN4, out var errorLine);
             var iCode = Marshal.GetLastWin32Error();
             if (infHandle.ToInt64() != INVALID_HANDLE_VALUE)
             {
-                var Context = new INFCONTEXT();
-                if (SetupFindFirstLine(infHandle, section, null, ref Context))
+                var context = new INFCONTEXT();
+                if (SetupFindFirstLine(infHandle, Section, null, ref context))
                     do
                     {
                         var sb = new StringBuilder(1024);
                         var valueName = string.Empty;
                         var valueText = new List<string>();
                         var fieldIndex = 0;
-                        int requiredSize;
 
-                        while (SetupGetStringField(ref Context, fieldIndex++, sb, sb.Capacity, out requiredSize))
+                        while (SetupGetStringField(ref context, fieldIndex++, sb, sb.Capacity, out var requiredSize))
                             if (fieldIndex == 1)
                                 valueName = sb.ToString(0, requiredSize - 1);
                             else
@@ -118,21 +116,20 @@ namespace PnpFind
                         {
                             Console.WriteLine("Skipping duplicate {0}", valueName);
                         }
-                    } while (SetupFindNextLine(ref Context, out Context));
+                    } while (SetupFindNextLine(ref context, out context));
                 else
-                    Console.WriteLine("Can't find {0} section.", section);
+                    Console.WriteLine("Can't find {0} section.", Section);
 
                 SetupCloseInfFile(infHandle);
             }
             else
             {
                 Console.WriteLine("Failed to open INF file. Error code - {0}.", iCode);
-                if (ErrorLine != 0) Console.WriteLine("Failure line - {0}.", ErrorLine);
+                if (errorLine != 0) Console.WriteLine("Failure line - {0}.", errorLine);
             }
 
             return false;
         }
-
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
         public struct INFCONTEXT
