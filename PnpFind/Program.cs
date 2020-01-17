@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using CommandLine;
 
 namespace PnpFind
 {
@@ -13,8 +14,55 @@ namespace PnpFind
         private static readonly List<Dictionary<string, List<string>>> OemFileInfoSelectedList =
             new List<Dictionary<string, List<string>>>();
 
+        private static int ParseEnumOptions(EnumOptions opts)
+        {
+            var t = DriverStoreEntry.Entries.ToList();
+
+            var oemFileList = DriverStore.GetOemInfFileList();
+            foreach (var oemFileInfo in oemFileList)
+            {
+                var matched = _matchText == string.Empty || oemFileInfo.Name.ToLower().Contains(_matchText);
+
+                DriverStore.GetInfSection(oemFileInfo.FullName, "Version", out var infEntities);
+                infEntities.Add("Inf", new List<string>(new[] { oemFileInfo.Name }));
+                infEntities.Remove("Signature");
+                infEntities.Remove("signature");
+                foreach (var infEntity in infEntities)
+                {
+                    foreach (var value in infEntity.Value)
+                    {
+                        if (_matchText == string.Empty)
+                            matched = true;
+                        else if (value.ToLower().Contains(_matchText.ToLower()))
+                            matched = true;
+
+                        if (matched) break;
+                    }
+
+                    if (matched) break;
+                }
+
+                if (matched) OemFileInfoSelectedList.Add(infEntities);
+            }
+
+            return 0;
+        }
+
+        private static int ParseDeleteOptions(DeleteOptions opts)
+        {
+            return 0;
+        }
+
         private static void Main(string[] args)
         {
+            Parser.Default.ParseArguments<EnumOptions, DeleteOptions>(args)
+                .MapResult(
+                    (EnumOptions Opts) => ParseEnumOptions(Opts),
+                    (DeleteOptions Opts) => ParseDeleteOptions(Opts),
+                    Errs => 1);
+
+            return;
+
             StreamWriter sw = null;
             foreach (var arg in args)
                 if (arg.ToLower().StartsWith("/out:"))

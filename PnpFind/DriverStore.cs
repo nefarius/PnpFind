@@ -89,7 +89,7 @@ namespace PnpFind
         public static bool GetInfSection(string InfFile, string Section,
             out Dictionary<string, List<string>> OemInfEntities)
         {
-            OemInfEntities = new Dictionary<string, List<string>>();
+            OemInfEntities = new Dictionary<string, List<string>>(StringComparer.InvariantCultureIgnoreCase);
             var infHandle = SetupOpenInfFile(InfFile, null, INF_STYLE_OLDNT | INF_STYLE_WIN4, out var errorLine);
             var iCode = Marshal.GetLastWin32Error();
             if (infHandle.ToInt64() != INVALID_HANDLE_VALUE)
