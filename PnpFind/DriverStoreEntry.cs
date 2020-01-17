@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace PnpFind
 {
@@ -41,6 +40,18 @@ namespace PnpFind
                     };
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return
+                $"InfName:        {InfName}\n" +
+                $"Class:          {Class}\n" +
+                $"ClassGUID:      {ClassGUID}\n" +
+                $"DriverDate:     {DriverDate}\n" +
+                $"DriverVersion:  {DriverVersion}\n" +
+                $"Provider:       {Provider}\n" +
+                $"Signature:      {Signature}";
         }
     }
 }

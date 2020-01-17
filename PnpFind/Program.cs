@@ -16,33 +16,31 @@ namespace PnpFind
 
         private static int ParseEnumOptions(EnumOptions opts)
         {
-            var t = DriverStoreEntry.Entries.ToList();
-
-            var oemFileList = DriverStore.GetOemInfFileList();
-            foreach (var oemFileInfo in oemFileList)
+            if (!opts.Match.HasValue)
             {
-                var matched = _matchText == string.Empty || oemFileInfo.Name.ToLower().Contains(_matchText);
-
-                DriverStore.GetInfSection(oemFileInfo.FullName, "Version", out var infEntities);
-                infEntities.Add("Inf", new List<string>(new[] { oemFileInfo.Name }));
-                infEntities.Remove("Signature");
-                infEntities.Remove("signature");
-                foreach (var infEntity in infEntities)
+                foreach (var entry in DriverStoreEntry.Entries)
                 {
-                    foreach (var value in infEntity.Value)
-                    {
-                        if (_matchText == string.Empty)
-                            matched = true;
-                        else if (value.ToLower().Contains(_matchText.ToLower()))
-                            matched = true;
-
-                        if (matched) break;
-                    }
-
-                    if (matched) break;
+                    Console.WriteLine($"{entry}\n");
                 }
 
-                if (matched) OemFileInfoSelectedList.Add(infEntities);
+                return 0;
+            }
+
+            try
+            {
+                foreach (var item in opts.Items)
+                {
+                    foreach (var entry in DriverStoreEntry.Entries.Where(p =>
+                        p.GetType().GetProperty(opts.Match.ToString()).GetValue(p, null).Equals(item)))
+                    {
+                        Console.WriteLine($"{entry}\n");
+                    }
+                }
+            }
+            catch (ArgumentException ae)
+            {
+                Console.WriteLine($"Error: {ae.Message}");
+                return 1;
             }
 
             return 0;
