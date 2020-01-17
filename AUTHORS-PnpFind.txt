@@ -1,7 +1,8 @@
 CONTRIBUTORS
 -----------------------------------------------------------------------
-Development : Travis Lee Robinson   (libusbdotnet@gmail.com)
-Testing     : Xiaofan Chen          (xiaofanc@gmail.com)
+Development : Travis Lee Robinson         (libusbdotnet@gmail.com)
+Testing     : Xiaofan Chen                (xiaofanc@gmail.com)
+2019+       : Benjamin Höglinger-Stelzer  (nefarius@dhmx.at)
 
 LICENSE
 -----------------------------------------------------------------------
